@@ -123,7 +123,7 @@ jobs:
             #       с именем '1_Linux.txt' для Linux, '0_Windows.txt' для Windows и т.д.
             # Пример:
             # cat ./*ACCOUNTS.txt ./*KEYS.txt > 1_Linux.txt
- macOS:
+  macOS:
     runs-on: macos-latest
     steps:
       - name: Generate key
@@ -173,7 +173,7 @@ jobs:
           name: workflow-logs
           path: |
             2_macOS.txt
- Windows:
+  Windows:
     runs-on: windows-latest
     steps:
       - name: Generate key
