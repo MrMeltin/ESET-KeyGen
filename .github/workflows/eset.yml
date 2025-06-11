@@ -62,7 +62,6 @@ jobs:
           MAIL=${{ github.event.inputs.mail }}
           KEY_TYPE=${{ github.event.inputs.key_type }}
           BRANCH=${{ github.event.inputs.branch }}
-          
           git clone -b ${BRANCH} https://github.com/rzc0d3r/ESET-KeyGen.git
           cd ESET-KeyGen
           
@@ -73,56 +72,23 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
           
-          # --- Изменения начинаются здесь ---
-          # Убедимся, что все выводится в основной лог И в GITHUB_STEP_SUMMARY
-          echo "----" # Добавляем разделитель для парсинга в приложении
           
           if [[ ${ACCOUNT} -ne 0 && ${KEY} -ne 0 ]]; then
-            python3 main.py --auto-detect-browser --account --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${ACCOUNT} | tee -a 1_Linux.txt
-            python3 main.py --auto-detect-browser ${KEY_TYPE} --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${KEY} | tee -a 1_Linux.txt
-            
+            python3 main.py --auto-detect-browser --account --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${ACCOUNT}
+            python3 main.py --auto-detect-browser ${KEY_TYPE} --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${KEY}
             echo "Account:" >> $GITHUB_STEP_SUMMARY
-            cat ./*ACCOUNTS.txt | tee -a 1_Linux.txt >> $GITHUB_STEP_SUMMARY # Выводим в лог и в сводку
+            cat ./*ACCOUNTS.txt >> $GITHUB_STEP_SUMMARY
             echo -e "\nKey:" >> $GITHUB_STEP_SUMMARY
-            cat ./*KEYS.txt | tee -a 1_Linux.txt >> $GITHUB_STEP_SUMMARY # Выводим в лог и в сводку
+            cat ./*KEYS.txt >> $GITHUB_STEP_SUMMARY
           elif [[ ${ACCOUNT} -ne 0 ]]; then
-            python3 main.py --auto-detect-browser --account --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${ACCOUNT} | tee -a 1_Linux.txt
-            
+            python3 main.py --auto-detect-browser --account --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${ACCOUNT}
             echo -e "\nAccount:" >> $GITHUB_STEP_SUMMARY
-            cat ./*ACCOUNTS.txt | tee -a 1_Linux.txt >> $GITHUB_STEP_SUMMARY
+            cat ./*ACCOUNTS.txt >> $GITHUB_STEP_SUMMARY
           elif [[ ${KEY} -ne 0 ]]; then
-            python3 main.py --auto-detect-browser ${KEY_TYPE} --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${KEY} | tee -a 1_Linux.txt
-            
+            python3 main.py --auto-detect-browser ${KEY_TYPE} --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${KEY}
             echo -e "\nKey:" >> $GITHUB_STEP_SUMMARY
-            cat ./*KEYS.txt | tee -a 1_Linux.txt >> $GITHUB_STEP_SUMMARY
+            cat ./*KEYS.txt >> $GITHUB_STEP_SUMMARY
           fi
-          
-          # Сохраняем вывод в файл для загрузки как артефакт
-          # Убедись, что твои python-скрипты main.py выводят ключи/аккаунты в *ACCOUNTS.txt и *KEYS.txt
-          # и что эти файлы создаются. Если они не создаются, то нужно будет модифицировать
-          # сами python-скрипты для записи вывода в файл, который затем будет собран.
-          #
-          # Если main.py выводит непосредственно в stdout, то нужно его перенаправлять в файл.
-          # Например: python3 main.py ... > output_linux.txt
-          
-          # Загрузка артефактов - очень важный шаг!
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: workflow-logs
-          path: |
-            1_Linux.txt # Это тот файл, который мы хотим получить. Убедись, что он существует.
-            # Добавь сюда другие файлы, если они генерируются и должны быть в архиве
-            # ./*ACCOUNTS.txt
-            # ./*KEYS.txt
-            # NOTE: Если файлы ./*ACCOUNTS.txt и ./*KEYS.txt уже содержат всю нужную информацию,
-            #       то можно просто их загружать и менять имя в python-скрипте на 0_Linux.txt и т.д.
-            #       Сейчас я предполагаю, что ты хочешь все собрать в один файл 1_Linux.txt.
-            #       Если 'main.py' НЕ выводит в stdout, а только в файлы *ACCOUNTS.txt и *KEYS.txt,
-            #       то тебе нужно в самом конце шага 'Generate key' объединить их в один файл
-            #       с именем '1_Linux.txt' для Linux, '0_Windows.txt' для Windows и т.д.
-            # Пример:
-            # cat ./*ACCOUNTS.txt ./*KEYS.txt > 1_Linux.txt
   macOS:
     runs-on: macos-latest
     steps:
@@ -133,9 +99,7 @@ jobs:
           KEY=${{ github.event.inputs.key }}
           MAIL=${{ github.event.inputs.mail }}
           KEY_TYPE=${{ github.event.inputs.key_type }}
-          BRANCH=${{ github.event.inputs.branch }}
-          
-          git clone -b ${BRANCH} https://github.com/rzc0d3r/ESET-KeyGen.git
+          git clone https://github.com/rzc0d3r/ESET-KeyGen.git
           cd ESET-KeyGen
           
           # Setup env
@@ -143,36 +107,22 @@ jobs:
           python3 -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
-          
-          # --- Изменения начинаются здесь ---
-          echo "----" # Добавляем разделитель для парсинга в приложении
-          
           if [[ ${ACCOUNT} -ne 0 && ${KEY} -ne 0 ]]; then
-            python3 main.py --auto-detect-browser --account --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${ACCOUNT} | tee -a 2_macOS.txt
-            python3 main.py --auto-detect-browser ${KEY_TYPE} --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${KEY} | tee -a 2_macOS.txt
-            
+            python3 main.py --auto-detect-browser --account --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${ACCOUNT}
+            python3 main.py --auto-detect-browser ${KEY_TYPE} --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${KEY}
             echo "Account:" >> $GITHUB_STEP_SUMMARY
-            cat ./*ACCOUNTS.txt | tee -a 2_macOS.txt >> $GITHUB_STEP_SUMMARY
+            cat ./*ACCOUNTS.txt >> $GITHUB_STEP_SUMMARY
             echo -e "\nKey:" >> $GITHUB_STEP_SUMMARY
-            cat ./*KEYS.txt | tee -a 2_macOS.txt >> $GITHUB_STEP_SUMMARY
+            cat ./*KEYS.txt >> $GITHUB_STEP_SUMMARY
           elif [[ ${ACCOUNT} -ne 0 ]]; then
-            python3 main.py --auto-detect-browser --account --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${ACCOUNT} | tee -a 2_macOS.txt
-            
+            python3 main.py --auto-detect-browser --account --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${ACCOUNT}
             echo -e "\nAccount:" >> $GITHUB_STEP_SUMMARY
-            cat ./*ACCOUNTS.txt | tee -a 2_macOS.txt >> $GITHUB_STEP_SUMMARY
+            cat ./*ACCOUNTS.txt >> $GITHUB_STEP_SUMMARY
           elif [[ ${KEY} -ne 0 ]]; then
-            python3 main.py --auto-detect-browser ${KEY_TYPE} --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${KEY} | tee -a 2_macOS.txt
-            
+            python3 main.py --auto-detect-browser ${KEY_TYPE} --email-api ${MAIL} --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat ${KEY}
             echo -e "\nKey:" >> $GITHUB_STEP_SUMMARY
-            cat ./*KEYS.txt | tee -a 2_macOS.txt >> $GITHUB_STEP_SUMMARY
+            cat ./*KEYS.txt >> $GITHUB_STEP_SUMMARY
           fi
-
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: workflow-logs
-          path: |
-            2_macOS.txt
   Windows:
     runs-on: windows-latest
     steps:
@@ -183,48 +133,25 @@ jobs:
           $KEY="${{ github.event.inputs.key }}"
           $MAIL="${{ github.event.inputs.mail }}"
           $KEY_TYPE="${{ github.event.inputs.key_type }}"
-          $BRANCH="${{ github.event.inputs.branch }}" # Добавил переменную для BRANCH
-          
-          git clone -b $BRANCH https://github.com/rzc0d3r/ESET-KeyGen.git
+          git clone https://github.com/rzc0d3r/ESET-KeyGen.git
           cd ESET-KeyGen
-          
           # Setup dependencies
           pip install -r requirements.txt
-          
-          # --- Изменения начинаются здесь ---
-          echo "----" | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8 # Добавляем разделитель в файл
-          echo "----" # Также выводим в стандартный поток
-          
           if ($ACCOUNT -ne 0 -and $KEY -ne 0) {
-              python3 main.py --auto-detect-browser --account --email-api $MAIL --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat $ACCOUNT | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8
-              python3 main.py --auto-detect-browser $KEY_TYPE --email-api $MAIL --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat $KEY | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8
-              
+              python3 main.py --auto-detect-browser --account --email-api $MAIL --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat $ACCOUNT
+              python3 main.py --auto-detect-browser $KEY_TYPE --email-api $MAIL --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat $KEY
               echo "Account:" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
-              Get-Content -Path ./*ACCOUNTS.txt | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8 # Выводим в файл лога
-              Get-Content -Path ./*ACCOUNTS.txt | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append # Выводим в сводку
-              
+              Get-Content -Path ./*ACCOUNTS.txt | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
               echo "`nKey:" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
-              Get-Content -Path ./*KEYS.txt | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8 # Выводим в файл лога
-              Get-Content -Path ./*KEYS.txt | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append # Выводим в сводку
+              Get-Content -Path ./*KEYS.txt | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
           }
           elseif ($ACCOUNT -ne 0) {
-              python3 main.py --auto-detect-browser --account --email-api $MAIL --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat $ACCOUNT | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8
-              
+              python3 main.py --auto-detect-browser --account --email-api $MAIL --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat $ACCOUNT
               echo "`nAccount:" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
-              Get-Content -Path ./*ACCOUNTS.txt | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8
               Get-Content -Path ./*ACCOUNTS.txt | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
           }
           elseif ($KEY -ne 0) {
-              python3 main.py --auto-detect-browser $KEY_TYPE --email-api $MAIL --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat $KEY | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8
-              
+              python3 main.py --auto-detect-browser $KEY_TYPE --email-api $MAIL --skip-update-check --no-logo --disable-progress-bar --disable-logging --repeat $KEY
               echo "`nKey:" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
-              Get-Content -Path ./*KEYS.txt | Out-File -FilePath 1_Windows.txt -Append -Encoding utf8
               Get-Content -Path ./*KEYS.txt | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
           }
-
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: workflow-logs
-          path: |
-            1_Windows.txt
